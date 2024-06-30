@@ -1,38 +1,17 @@
 <script>
     import "../styles.css"
     import Header from "../../lib/components/header.svelte";
-    import { invalidateAll} from '$app/navigation'
+    import {enhance} from '$app/forms'
 
 
     let title = "CONTACT US"
     export let data;
-  
+    export let form;
+    console.log(form)
+
     $: contacts = data?.contacts;
-
     
-    export const actions = {
-        default: async ({request}) =>{
-            const formData = await request.formData()
-
-            const name = formData.get('name')
-            const email = formData.get('email')
-            const company = formData.get('company')
-            const job = formData.get('job')
-            const id = crypto.randomUUID()
-            
-            const contact = [{
-                id,
-                name,
-                email,
-                company,
-                job,
-            }]
-            contacts.push(contact)
-            console.log(formData)
-        }
-        
-    
-    }
+    $: form = form?.message
 </script>
 
 <Header {title}/>
@@ -54,6 +33,13 @@
                 <td>{contact.email}</td>
                 <td>{contact.company}</td>
                 <td>{contact.job}</td>
+                <td>
+                    <form action="?/delete" method="POST" use:enhance>
+                        <input type="hidden" hidden name="id" value="{contact.id}">
+                        <button class="delete"><i class="fa-regular fa-trash-can"></i></button>
+                    </form>
+                </td>
+                
             </tr>
             {/each}
         </tbody>
@@ -61,21 +47,29 @@
 </section>
 <main>
 <h1>Contact Us</h1>
-<form method="POST" enctype="multipart/form-data">
+{#if form}
+<span class="message">{form}</span>
+{/if}
+<form method="POST" enctype="multipart/form-data" action="?/create" use:enhance class="create">
     <label for="name">Name</label>
-    <input type="text" name="name" id="name" />
+    <input type="text" name="name" id="name"  />
+   
     <label for="email">Email</label>
     <input type="email" name="email" id="email" />
+    
     <label for="company">Company</label>
-    <input text="text" name="company" id="message">
+    <input text="text" name="company" id="message" >
+    
     <label for="job">Job</label>
-    <input type="text" name="job" id="job">
+    <input type="text" name="job" id="job" >
+ 
     <button type="submit">Send</button>
+    
 </form>
 </main>
 <style>
 
-    form{
+    .create{
         display: block;
         margin:auto;
         padding: 20px;
@@ -106,6 +100,22 @@
         font-weight: bold;
         margin-top: 20px;
     }
+    .delete{
+        display: block;
+        margin: auto;    
+        padding: 10px 20px;
+        background-color: orangered;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;    
+        font-size: 16px;    
+        font-weight: bold;
+        margin-top: 20px;
+    }
+    .delete:hover{
+        background-color: rgb(235, 75, 16);
+    }
     button:hover{
         background-color: #45a049;
     }
@@ -129,5 +139,16 @@
         display: block;
         margin: auto;
         max-width: 900px;
-    }   
+    }
+    span{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .message{
+        color: #45a049;
+        font-size: large;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
 </style>
